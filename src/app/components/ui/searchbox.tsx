@@ -5,18 +5,14 @@ import {
 	RewriteEntry,
 	db,
 	defaultRewriteEntry,
-	entryConfigDefault,
 } from "@/app/lib/db"
-import { partialUpdateObject } from "@/app/lib/generic"
-import { Entry, defaultEntry } from "@/app/lib/types"
-import { Messages, validateWord } from "@/app/lib/validate"
-import { Box, Button, HStack, Heading, Input, VStack } from "@kuma-ui/core"
-import { ChangeEvent, ChangeEventHandler, useActionState, useEffect, useReducer, useState } from "react"
-import { Control, useForm, useFormState, useWatch } from "react-hook-form"
+import { Entry } from "@/app/lib/types"
+import { Box, Button, HStack, Heading, Input } from "@kuma-ui/core"
+import { useEffect, useState } from "react"
+import { Control, useForm, useWatch } from "react-hook-form"
 import { SearchList } from "./searchList"
 
 export const Searchbox = () => {
-	const [messages, setMessages] = useState<Messages>({})
 	const [result, setResult] = useState("")
 	const [touching, setTouching] = useState<keyof Entry>("from")
 
@@ -26,7 +22,6 @@ export const Searchbox = () => {
 		formState,
 		control,
 		setFocus,
-		getFieldState
 	} = useForm<RewriteEntry>({
 		mode: "onChange",
 		defaultValues: defaultRewriteEntry,
@@ -38,7 +33,6 @@ export const Searchbox = () => {
 
 	const submit = async (e: RewriteEntry) => {
 		console.log("submitted: ", e)
-		// console.log("db contents: ", await db.entries.toArray())
 		const res = await db.entries.put(e)
 		setResult(res)
 	}
@@ -47,7 +41,7 @@ export const Searchbox = () => {
 		<form onSubmit={handleSubmit(submit)}>
 			<HStack>
 				{(["ic", "mw", "sc"] as (keyof EntryConfig)[]).map(key => (
-					<label>
+					<label key={key}>
 						<span>{key}</span>
 						<Input type="checkbox" {...register(key)} />
 					</label>
@@ -57,7 +51,7 @@ export const Searchbox = () => {
 				{ ["from", "to"].map(key => {
 					const k = key as keyof Entry
 					return(
-						<Box>
+						<Box key={k}>
 							<Input {...register(k, { required: "input something" })}
 								placeholder={`rewrite ${k} ...`}
 								onFocus={()=>{
@@ -71,7 +65,6 @@ export const Searchbox = () => {
 				}) }
 				<Button type="submit"
 					disabled={!formState.isValid}
-					// opacity={formState.errors ? .5 : 1}
 				>add</Button>
 			</HStack>
 		</form>

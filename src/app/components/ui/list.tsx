@@ -1,6 +1,6 @@
 "use client"
-import { RewriteEntry, db } from "@/app/lib/db"
-import { Box, Heading, VStack } from "@kuma-ui/core"
+import { RewriteEntry } from "@/app/lib/db"
+import { VStack } from "@kuma-ui/core"
 import { Entry } from "./listEntry"
 import { Fragment } from "react"
 

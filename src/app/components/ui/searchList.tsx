@@ -3,7 +3,6 @@
 import { RewriteEntry, db } from "@/app/lib/db"
 import { useLiveQuery } from "dexie-react-hooks"
 import { ListOfEntries } from "./list"
-import { defaultEntry } from "@/app/types"
 
 export const SearchList = ({ matchedTo }: { matchedTo: Partial<RewriteEntry> }) => {
   const kvs = Object.entries(matchedTo) as [keyof RewriteEntry, string|boolean][]
