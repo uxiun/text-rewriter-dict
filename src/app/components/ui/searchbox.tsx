@@ -1,6 +1,5 @@
 "use client"
 
-import { addEntry } from "@/app/lib/actions"
 import {
 	EntryConfig,
 	RewriteEntry,
@@ -12,29 +11,45 @@ import { partialUpdateObject } from "@/app/lib/generic"
 import { Entry, defaultEntry } from "@/app/lib/types"
 import { Messages, validateWord } from "@/app/lib/validate"
 import { Box, Button, HStack, Heading, Input, VStack } from "@kuma-ui/core"
-import { ChangeEvent, ChangeEventHandler, useActionState, useReducer, useState } from "react"
-import { useFormState, useFormStatus } from "react-dom"
+import { ChangeEvent, ChangeEventHandler, useActionState, useEffect, useReducer, useState } from "react"
+import { Control, useForm, useFormState, useWatch } from "react-hook-form"
+import { SearchList } from "./searchList"
 
 export const Searchbox = () => {
 	const [messages, setMessages] = useState<Messages>({})
 	const [result, setResult] = useState("")
-	const [formState, action] = useFormState(async e => {
-		const res = await addEntry(e)
-		if (res) {
-			setResult(res)
-			return e
-		} else return {...e, from: "", to: ""}
-	} , defaultRewriteEntry)
+	const [touching, setTouching] = useState<keyof Entry>("from")
 
-	const passedValidation = messages.error === undefined
+	const {
+		register,
+		handleSubmit,
+		formState,
+		control,
+		setFocus,
+		getFieldState
+	} = useForm<RewriteEntry>({
+		mode: "onChange",
+		defaultValues: defaultRewriteEntry,
+	})
 
-	return (
-		<form action={action}>
+	useEffect(()=>{
+		setFocus("from")
+	}, [setFocus])
+
+	const submit = async (e: RewriteEntry) => {
+		console.log("submitted: ", e)
+		// console.log("db contents: ", await db.entries.toArray())
+		const res = await db.entries.put(e)
+		setResult(res)
+	}
+
+	return (<>
+		<form onSubmit={handleSubmit(submit)}>
 			<HStack>
 				{(["ic", "mw", "sc"] as (keyof EntryConfig)[]).map(key => (
 					<label>
 						<span>{key}</span>
-						<Input name={key} type="checkbox" checked={formState[key]} />
+						<Input type="checkbox" {...register(key)} />
 					</label>
 				))}
 			</HStack>
@@ -43,29 +58,49 @@ export const Searchbox = () => {
 					const k = key as keyof Entry
 					return(
 						<Box>
-							<Input name={key} type="text" placeholder={`rewrite ${k} ...`} onChange={(e: ChangeEvent<HTMLInputElement>) => {
-								const m = validateWord(e.target.value, k)
-								setMessages(m)
-							}} />
-							{messages.error && (messages.error[k] ? <Box color="red">{messages.error[k]} </Box>: "")}
-							{messages.warning && (messages.warning[k] ? <Box color="orange">{messages.warning[k]} </Box>: "")}
+							<Input {...register(k, { required: "input something" })}
+								placeholder={`rewrite ${k} ...`}
+								onFocus={()=>{
+									setTouching(k)
+								}}
+							/>
+							{formState.errors[k]?.message && <Box color="red">{formState.errors[k]?.message}</Box> }
+
 						</Box>
 					)
 				}) }
-				<FormReactive passedValidation />
-			</HStack>
-			<HStack>
-				<Heading as="h1">from: {formState.from}</Heading>
-				<Heading as="h1">to: {formState.to}</Heading>
+				<Button type="submit"
+					disabled={!formState.isValid}
+					// opacity={formState.errors ? .5 : 1}
+				>add</Button>
 			</HStack>
 		</form>
-	)
+		<FormReactive res={result} />
+		<Watched control={control} touching={touching}/>
+	</>)
 }
 
-const FormReactive = ({passedValidation}: {passedValidation: boolean}) => {
-	const status = useFormStatus()
+const Watched = ({ control, touching }: { control: Control<RewriteEntry>, touching: keyof Entry }) => {
+	const [from, to] = useWatch({
+		control,
+		name: ["from", "to"],
+		defaultValue: {
+			from: "",
+			to: ""
+		},
+	})
 
-	return (
-			<Button disabled={status.pending || !passedValidation} >post</Button>
-	)
+	const matchedTo: Partial<Entry> = { }
+	if (touching == "from") matchedTo.from = from
+	else matchedTo.to = to
+
+	return <>
+		<Heading as="h1">Searched</Heading>
+		<Box>{`${from} -> ${to}`} </Box>
+		<SearchList matchedTo={matchedTo} />
+	</>
+}
+
+const FormReactive = ({res}: {res?: string}) => {
+	return res && res.length>0 && (<Box>res: {res}</Box>)
 }

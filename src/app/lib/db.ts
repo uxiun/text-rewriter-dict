@@ -1,3 +1,5 @@
+// import "fake-indexeddb/auto"
+import { indexedDB, IDBKeyRange } from "fake-indexeddb"
 import Dexie, { type EntityTable } from "dexie";
 import { Entry } from "./types";
 
@@ -20,12 +22,15 @@ export const defaultRewriteEntry: RewriteEntry = {
 	to: "",
 }
 
-const db = new Dexie("TextRewriterEntries") as Dexie & {
+const db = new Dexie("TextRewriterEntries", {
+	indexedDB: indexedDB,
+	IDBKeyRange: IDBKeyRange,
+}) as Dexie & {
 	entries: EntityTable<RewriteEntry, "from">
 }
 
 db.version(1).stores({
-	entries: "++from, to, ic, mw, sc"
+	entries: "&from, to, ic, mw, sc"
 })
 
 export type { EntryConfig, RewriteEntry }

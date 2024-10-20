@@ -1,16 +1,17 @@
 "use client"
-import { db } from "@/app/lib/db"
-import { useLiveQuery } from "dexie-react-hooks"
+import { RewriteEntry, db } from "@/app/lib/db"
+import { Box, Heading, VStack } from "@kuma-ui/core"
+import { Entry } from "./listEntry"
+import { Fragment } from "react"
 
-export const List = () => {
-  const entries = useLiveQuery(()=> db.entries.toArray())
-  
-  return(
-    <ol>
-      {entries?.map(e =>
-        <li key={e.from}>
-          {JSON.stringify(e)}
-        </li>)}
-    </ol>
-  )
+export const ListOfEntries = ({ entries }: { entries: RewriteEntry[] | undefined }) => {
+	return (
+		<VStack>
+			{entries?.map(e => (
+				<Fragment key={e.from}>
+          <Entry entry={e} />
+        </Fragment>
+			))}
+		</VStack>
+	)
 }
