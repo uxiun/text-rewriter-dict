@@ -1,6 +1,6 @@
 "use client"
 
-import { EntryConfig, RewriteEntry } from "@/app/lib/db"
+import { EntryConfig, RewriteEntry } from "@/app/lib/types"
 import { HStack, Input, Box } from "@kuma-ui/core"
 import { Fragment } from "react"
 

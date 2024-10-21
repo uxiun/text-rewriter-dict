@@ -1,17 +1,13 @@
 "use client"
 
-import { RewriteEntry, db } from "@/app/lib/db"
-import { useLiveQuery } from "dexie-react-hooks"
 import { ListOfEntries } from "./list"
+import { RewriteEntry } from "@/app/lib/types"
+import { useAllWithLocalStorage } from "@/app/hooks/allData"
 
 export const SearchList = ({ matchedTo }: { matchedTo: Partial<RewriteEntry> }) => {
   const kvs = Object.entries(matchedTo) as [keyof RewriteEntry, string|boolean][]
-  console.log(kvs)
 
-  const collection = useLiveQuery(()=> db.entries
-    // .filter(e => matchedTo.from? e.from === matchedTo.from : true)
-    .toArray()
-  );
+  const collection = useAllWithLocalStorage()
 
   const matched = collection?.filter(e =>
       kvs.every(([k, v]) =>
@@ -19,6 +15,5 @@ export const SearchList = ({ matchedTo }: { matchedTo: Partial<RewriteEntry> }) 
       )
     )
 
-  console.log(collection?.length)
   return <ListOfEntries entries={matched} />
 }
