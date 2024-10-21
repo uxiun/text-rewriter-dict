@@ -1,4 +1,4 @@
-import { RewriteEntry } from "./db"
+import { RewriteEntry } from "./types"
 import { Entry } from "./types"
 
 export type Messages = {
