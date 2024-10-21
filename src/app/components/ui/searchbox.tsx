@@ -3,9 +3,9 @@
 import {
 	EntryConfig,
 	RewriteEntry,
-	db,
-	defaultRewriteEntry,
-} from "@/app/lib/db"
+	defaultRewriteEntry
+} from "@/app/lib/types"
+import { db } from "@/app/lib/db"
 import { Entry } from "@/app/lib/types"
 import { Box, Button, HStack, Heading, Input } from "@kuma-ui/core"
 import { useEffect, useState } from "react"
